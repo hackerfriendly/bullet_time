@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Fetch photos directly from SD
+
+DEST=~/Desktop/
+
+CAM=`ls -d /media/CAM*`
+CAM=`basename $CAM`
+
+echo Extracting from $CAM...
+
+mkdir -p $DEST/$CAM
+
+cp /media/$CAM/DCIM/100CANON/* $DEST/$CAM
+
+echo -n "Hit any key to clear SD card, or ^C to cancel."
+read -n 1 
+
+echo "Clearing flash..."
+
+rm -f /media/$CAM/DCIM/100CANON/*
+
+echo "Unmounting flash..."
+
+umount /media/$CAM
+
+echo "Done. Don't forget to reset the write lock switch."
+
+# for x in *; do z=0; cd $x; pwd; for y in *; do mv $y $z.jpg; z=$((z + 1)); done; cd - > /dev/null; done
