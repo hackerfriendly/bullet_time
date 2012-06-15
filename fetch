@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Fetch photos from all cameras, using gvfs
+
+GVFS="/home/rob/.gvfs/"
+DEST="/home/rob/bullettime/`date +%Y-%m-%d`/$$"
+
+CAMERAS=`ls $GVFS | wc -l`
+
+if [ "$CAMERAS" -ne "10" ]; then
+  echo "I only see $CAMERAS cameras. Make sure the remote is disabled on all"
+  echo "cameras and try again."
+  exit $CAMERAS
+fi
+
+[ ! -d $DEST ] && mkdir -p $DEST
+
+# This turns the cameras off in order. Neat trick.
+IFS=$'\n'
+CAMERA=1
+FILE=1
+for cam in $GVFS/*; do
+  echo "Camera $CAMERA:"
+  mkdir $DEST/$CAMERA
+  for file in $cam/DCIM/100CANON/*; do
+    cp $file $DEST/$CAMERA/$FILE.jpg
+    FILE=$((FILE + 1))
+    echo -n .
+  done
+  echo
+  CAMERA=$((CAMERA + 1))
+  FILE=1
+done
+
+echo
+echo -n "Clear photos on all cameras? [y/N]"
+read -sn 1
+echo
+
+if [ "$REPLY" == "y" ]; then
+  echo "Clearing cameras..."
+  find $GVFS -type f -name *.JPG -exec rm -f {} \;
+else
+  echo "Leaving photos on the cameras."
+fi
+
+echo "Don't forget to unplug the USB hub before taking more photos."
+
